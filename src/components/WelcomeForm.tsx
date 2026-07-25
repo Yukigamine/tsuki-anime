@@ -92,9 +92,11 @@ export default function WelcomeForm({
     }
 
     if (provider === "credentials") {
+      const username = String(formData.get("username") ?? "");
+      const displayName = String(formData.get("displayName") ?? "").trim();
       const signUp = await authClient.signUp.email({
-        name: String(formData.get("displayName") || formData.get("username")),
-        username: String(formData.get("username") ?? ""),
+        name: displayName || username,
+        username,
         email: masterEmail,
         password: String(formData.get("password") ?? ""),
       });
