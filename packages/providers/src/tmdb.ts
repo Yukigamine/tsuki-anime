@@ -23,7 +23,7 @@ export function normalizeTmdbResults(
   }
 
   return payload.results.flatMap((movie) => {
-    if (movie.id == null || !movie.title) {
+    if (typeof movie.id !== "number" || !movie.title) {
       return [];
     }
     const year = movie.release_date?.slice(0, 4);

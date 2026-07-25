@@ -114,7 +114,8 @@ export function CollectionPage({ mediaName, providerName, storageKey }: Props) {
           );
         }
       }
-    } catch {
+    } catch (error) {
+      console.warn("Ignoring invalid saved collection", error);
       localStorage.removeItem(storageKey);
     } finally {
       setLoaded(true);

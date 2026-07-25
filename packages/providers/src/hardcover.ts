@@ -23,6 +23,10 @@ type HardcoverResponse = {
   errors?: unknown[];
 };
 
+function isHardcoverSearchItem(value: unknown): value is HardcoverSearchItem {
+  return typeof value === "object" && value !== null;
+}
+
 export function normalizeHardcoverResults(
   payload: HardcoverResponse,
 ): MediaSearchResult[] {
@@ -31,8 +35,11 @@ export function normalizeHardcoverResults(
     return [];
   }
 
-  return results.flatMap((item: HardcoverSearchItem) => {
-    if (item.id == null || !item.title) {
+  return results.filter(isHardcoverSearchItem).flatMap((item) => {
+    if (
+      (typeof item.id !== "string" && typeof item.id !== "number") ||
+      !item.title
+    ) {
       return [];
     }
     const imageUrl =
