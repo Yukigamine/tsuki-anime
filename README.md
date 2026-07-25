@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Suki Media
 
-## Getting Started
+Suki Media is a pnpm monorepo for personal media collections.
 
-First, run the development server:
+## Apps
+
+| App | Development URL | Data provider | Features |
+| --- | --- | --- | --- |
+| Anime | http://localhost:3000 | Kitsu and AniList | Existing anime and manga lists and collections |
+| Books | http://localhost:3001 | Hardcover GraphQL | Book search and browser-local collection |
+| Movies | http://localhost:3002 | TMDB REST | Movie search and browser-local collection |
+
+The original anime/manga application lives unchanged in `apps/anime`. The books
+and movies apps share their collection page, app shell, theme, and provider
+response types through packages in `packages/`.
+
+## Setup
+
+Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Copy `.env.example` to `.env` and configure the services you use. Book search
+requires `HARDCOVER_API_TOKEN`; movie search requires `TMDB_API_TOKEN`. Tokens
+are read only by server-side API routes and are never sent to the browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm dev          # anime/manga app
+pnpm dev:books    # books app
+pnpm dev:movies   # movies app
+pnpm dev:all      # all apps
+```
 
-## Learn More
+## Validation
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm test
+pnpm typecheck
+pnpm lint-check
+pnpm build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Workspace layout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```text
+apps/
+  anime/    Existing anime and manga application
+  books/    Hardcover-backed book collection
+  movies/   TMDB-backed movie collection
+packages/
+  providers/  Server API clients and response normalization
+  ui/         Shared collection UI, app shell, and theme
+```

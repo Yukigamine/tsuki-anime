@@ -13,7 +13,8 @@
       "!.next",
       "!dist",
       "!build",
-      "!src/lib/zeus"
+      "!apps/anime/src/lib/zeus",
+      "!apps/anime/src/generated"
     ]
   },
   "formatter": {
