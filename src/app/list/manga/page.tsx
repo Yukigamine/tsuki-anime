@@ -1,8 +1,9 @@
 import { Box, Container, Typography } from "@mui/material";
 import type { Metadata } from "next";
-import KitsuOwnedMediaTitle from "@/components/KitsuOwnedMediaTitle";
 import ListAddButton from "@/components/ListAddButton";
 import MangaListClient from "@/components/MangaListClient";
+import { MediaLibraryHeader } from "@/components/MediaLibraryHeader";
+import { getLibraryPageTitle } from "@/lib/library-page-title";
 import { getMangaListSnapshot } from "@/lib/list";
 import { getSession } from "@/lib/session";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = { title: "Manga List – Tsuki Anime" };
 export const dynamic = "force-dynamic";
 
 export default async function MangaListPage() {
+  const title = getLibraryPageTitle("manga", "list");
   let items: Awaited<ReturnType<typeof getMangaListSnapshot>>["items"] = [];
   let counts: Awaited<ReturnType<typeof getMangaListSnapshot>>["counts"] = {};
   let isAuthenticated = false;
@@ -34,7 +36,9 @@ export default async function MangaListPage() {
     console.error("Failed to load manga list:", err, e);
     return (
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <KitsuOwnedMediaTitle mediaTitle="Manga List" />
+        <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
+          {title}
+        </Typography>
         <Box sx={{ textAlign: "center", py: 12 }}>
           <Typography variant="h5" color="error" gutterBottom>
             Error loading list
@@ -49,29 +53,28 @@ export default async function MangaListPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { xs: "flex-end", sm: "center" },
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 4,
-          "& > .MuiTypography-root": { mb: 0 },
-        }}
-      >
-        <KitsuOwnedMediaTitle mediaTitle="Manga List" />
-        {isAuthenticated && (
-          <ListAddButton
-            type="manga"
-            existingKitsuIds={items.flatMap((item) =>
-              item.kitsuId ? [item.kitsuId] : [],
-            )}
-          />
-        )}
-      </Box>
+      <MediaLibraryHeader
+        title={title}
+        action={
+          isAuthenticated ? (
+            <ListAddButton
+              type="manga"
+              existingKitsuIds={items.flatMap((item) =>
+                item.kitsuId ? [item.kitsuId] : [],
+              )}
+            />
+          ) : undefined
+        }
+      />
 
-      <MangaListClient items={items} counts={counts} />
+      <MangaListClient
+        items={items}
+        counts={counts}
+        existingKitsuIds={items.flatMap((item) =>
+          item.kitsuId ? [item.kitsuId] : [],
+        )}
+        isAuthenticated={isAuthenticated}
+      />
     </Container>
   );
 }

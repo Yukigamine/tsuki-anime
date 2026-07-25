@@ -13,10 +13,11 @@ import {
   TableRow,
   Tooltip,
 } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { CollectionAddButton } from "@/components/CollectionAddButton";
 import { CollectionItemActions } from "@/components/CollectionItemActions";
 import type { ViewMode } from "@/components/CollectionViewToggle";
-import { CollectionViewToggle } from "@/components/CollectionViewToggle";
+import { MediaLibraryToolbar } from "@/components/MediaLibraryToolbar";
 import type {
   Anime,
   AnimeCollectionItem,
@@ -36,6 +37,29 @@ interface Props<T> {
   gridComponent: React.ComponentType<{ items: T[]; isAuthenticated: boolean }>;
   isAuthenticated?: boolean;
 }
+
+type CollectionTab =
+  | "ALL"
+  | "BLU_RAY"
+  | "DVD"
+  | "VHS"
+  | "DIGITAL"
+  | "ENGLISH"
+  | "OTHER";
+
+const ANIME_TABS: Array<{ value: CollectionTab; label: string }> = [
+  { value: "ALL", label: "All" },
+  { value: "BLU_RAY", label: "Blu-ray" },
+  { value: "DVD", label: "DVD" },
+  { value: "VHS", label: "VHS" },
+  { value: "DIGITAL", label: "Digital" },
+  { value: "OTHER", label: "Other" },
+];
+
+const MANGA_TABS: Array<{ value: CollectionTab; label: string }> = [
+  { value: "ALL", label: "All" },
+  { value: "ENGLISH", label: "English" },
+];
 
 const RARITY_LABELS: Record<string, string> = {
   STANDARD: "Standard",
@@ -70,6 +94,11 @@ const LANGUAGE_LABELS: Record<string, string> = {
   OTHER: "🌐 Other",
 };
 
+function getCollectionTitle(item: Item): string {
+  const media = "anime" in item ? item.anime : item.manga;
+  return media.titleEn ?? media.titleRomaji ?? media.titleJp ?? "Unknown";
+}
+
 export function CollectionViewWrapper<T extends Item>({
   items,
   type,
@@ -77,15 +106,8 @@ export function CollectionViewWrapper<T extends Item>({
   isAuthenticated = false,
 }: Props<T>) {
   const [view, setView] = useState<ViewMode>("grid");
-
-  const getTitle = (item: T): string => {
-    if ("anime" in item) {
-      const anime = item.anime as Anime;
-      return anime.titleEn ?? anime.titleRomaji ?? anime.titleJp ?? "Unknown";
-    }
-    const manga = item.manga as Manga;
-    return manga.titleEn ?? manga.titleRomaji ?? manga.titleJp ?? "Unknown";
-  };
+  const [activeTab, setActiveTab] = useState<CollectionTab>("ALL");
+  const [search, setSearch] = useState("");
 
   const getCoverUrl = (item: T): string => {
     if ("anime" in item)
@@ -99,21 +121,76 @@ export function CollectionViewWrapper<T extends Item>({
       : getMangaDetailPath(item.manga as Manga);
   };
 
+  const tabCounts = useMemo(() => {
+    const counts: Record<string, number> = { ALL: items.length };
+    for (const item of items) {
+      const category =
+        "anime" in item
+          ? (item as AnimeItem).format
+          : (item as MangaItem).language;
+      counts[category] = (counts[category] ?? 0) + 1;
+    }
+    return counts;
+  }, [items]);
+  const tabs = (type === "anime" ? ANIME_TABS : MANGA_TABS).filter(
+    (tab) => (tabCounts[tab.value] ?? 0) > 0,
+  );
+  const filteredItems = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return items.filter((item) => {
+      const category =
+        "anime" in item
+          ? (item as AnimeItem).format
+          : (item as MangaItem).language;
+      const matchesTab = activeTab === "ALL" || category === activeTab;
+      const matchesSearch =
+        !query || getCollectionTitle(item).toLowerCase().includes(query);
+      return matchesTab && matchesSearch;
+    });
+  }, [activeTab, items, search]);
+
   return (
     <Stack spacing={2}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-        <CollectionViewToggle view={view} onViewChange={setView} />
-      </Box>
+      <MediaLibraryToolbar
+        tabs={tabs.map((tab) => ({ ...tab, count: tabCounts[tab.value] ?? 0 }))}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSearchChange={setSearch}
+        view={view}
+        onViewChange={setView}
+        mobileAdd={
+          isAuthenticated ? (
+            <Box sx={{ display: { xs: "block", md: "none" } }}>
+              <CollectionAddButton type={type} iconOnly />
+            </Box>
+          ) : undefined
+        }
+      />
 
-      {view === "grid" ? (
-        <GridComponent items={items} isAuthenticated={isAuthenticated} />
+      {filteredItems.length === 0 ? (
+        <Box sx={{ textAlign: "center", py: 8, color: "text.secondary" }}>
+          No collection items found
+        </Box>
+      ) : view === "grid" ? (
+        <GridComponent
+          items={filteredItems}
+          isAuthenticated={isAuthenticated}
+        />
       ) : (
         <TableContainer component={Paper}>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell sx={{ width: 60 }} />
-                <TableCell>Title</TableCell>
+                <TableCell
+                  sx={{
+                    width: 48,
+                    minWidth: 48,
+                    maxWidth: 48,
+                    boxSizing: "border-box",
+                    p: 0.5,
+                  }}
+                />
+                <TableCell sx={{ minWidth: 150, pl: 0.5 }}>Title</TableCell>
                 {type !== "manga" && (
                   <>
                     <TableCell>Rarity</TableCell>
@@ -138,15 +215,23 @@ export function CollectionViewWrapper<T extends Item>({
               </TableRow>
             </TableHead>
             <TableBody>
-              {items.map((item) => {
-                const title = getTitle(item);
+              {filteredItems.map((item) => {
+                const title = getCollectionTitle(item);
                 const coverUrl = getCoverUrl(item);
                 const isMangaItem = "manga" in item;
                 const mangaItem = isMangaItem ? (item as MangaItem) : null;
 
                 return (
                   <TableRow key={item.id} hover>
-                    <TableCell sx={{ p: 0.5 }}>
+                    <TableCell
+                      sx={{
+                        width: 48,
+                        minWidth: 48,
+                        maxWidth: 48,
+                        boxSizing: "border-box",
+                        p: 0.5,
+                      }}
+                    >
                       <Box
                         component="img"
                         src={coverUrl}
@@ -159,7 +244,7 @@ export function CollectionViewWrapper<T extends Item>({
                         }}
                       />
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 500 }}>
+                    <TableCell sx={{ minWidth: 150, fontWeight: 500, pl: 0.5 }}>
                       <Box
                         component="a"
                         href={getDetailPath(item)}

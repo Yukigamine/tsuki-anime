@@ -38,10 +38,12 @@ function MangaCard({
   item,
   detailHref,
   onEdit,
+  canEdit,
 }: {
   item: MangaWithEntry;
   detailHref: string;
   onEdit: (item: MangaWithEntry) => void;
+  canEdit: boolean;
 }) {
   const entry = item.listEntry;
   const title = item.titleEn ?? item.titleRomaji ?? item.titleJp ?? "Unknown";
@@ -113,26 +115,28 @@ function MangaCard({
         )}
       </AppLink>
 
-      <Tooltip title={`Edit ${title}`}>
-        <IconButton
-          className="edit-action"
-          size="small"
-          onClick={() => onEdit(item)}
-          sx={{
-            position: "absolute",
-            bottom: 4,
-            right: 4,
-            bgcolor: "background.paper",
-            zIndex: 1,
-            opacity: 0,
-            pointerEvents: "none",
-            transition: "opacity 0.15s ease",
-          }}
-          aria-label={`Edit ${title}`}
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      {canEdit && (
+        <Tooltip title={`Edit ${title}`}>
+          <IconButton
+            className="edit-action"
+            size="small"
+            onClick={() => onEdit(item)}
+            sx={{
+              position: "absolute",
+              bottom: 4,
+              right: 4,
+              bgcolor: "background.paper",
+              zIndex: 1,
+              opacity: 0,
+              pointerEvents: "none",
+              transition: "opacity 0.15s ease",
+            }}
+            aria-label={`Edit ${title}`}
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      )}
 
       <CardContent
         sx={{

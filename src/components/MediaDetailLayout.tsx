@@ -13,7 +13,7 @@ type Props = {
   heroOverlay?: ReactNode;
   heroContent?: ReactNode;
   heroChips: ReactNode;
-  quickActions: ReactNode;
+  quickActions?: ReactNode;
   listStatus: ReactNode;
   collectionOwnership?: ReactNode;
   sidebarExtra?: ReactNode;
@@ -117,32 +117,40 @@ export default function MediaDetailLayout({
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "320px minmax(0, 1fr)" },
+          gridTemplateColumns: {
+            xs: "minmax(0, 1fr)",
+            md: "320px minmax(0, 1fr)",
+          },
           gap: 3,
           alignItems: { xs: "start", md: "start" },
+          width: "100%",
+          maxWidth: "100%",
           minWidth: 0,
         }}
       >
         <Box
           sx={{
+            display: { xs: "contents", md: "block" },
             width: "100%",
             alignSelf: "start",
-            height: { md: "100%" },
             minWidth: 0,
+            position: { md: "sticky" },
+            top: { md: 92 },
+            zIndex: 100,
           }}
         >
           <Stack
             spacing={2.5}
             sx={{
               width: "100%",
+              maxWidth: "100%",
               minWidth: 0,
-              position: { xs: "static", md: "sticky" },
-              top: { md: 92 },
+              overflow: "hidden",
               alignSelf: "start",
-              zIndex: 100,
+              order: { xs: 1, md: "initial" },
             }}
           >
-            <Paper sx={{ p: 2.5 }}>{quickActions}</Paper>
+            {quickActions && <Paper sx={{ p: 2.5 }}>{quickActions}</Paper>}
 
             <Paper sx={{ p: 2.5 }}>
               <Typography variant="h6" sx={{ mb: 1.25 }}>
@@ -161,24 +169,32 @@ export default function MediaDetailLayout({
                 {collectionOwnership}
               </Paper>
             )}
-
-            {sidebarExtra && (
-              <Paper
-                sx={{
-                  p: 2.5,
-                  "&:has(.related-media-empty)": { display: "none" },
-                }}
-              >
-                {sidebarExtra}
-              </Paper>
-            )}
           </Stack>
+
+          {sidebarExtra && (
+            <Paper
+              sx={{
+                p: 2.5,
+                mt: { xs: 0, md: 2.5 },
+                order: { xs: 3, md: "initial" },
+                width: "100%",
+                maxWidth: "100%",
+                minWidth: 0,
+                overflow: "hidden",
+                "&:has(.related-media-empty)": { display: "none" },
+              }}
+            >
+              {sidebarExtra}
+            </Paper>
+          )}
         </Box>
 
         <Paper
           sx={{
             p: 2.5,
+            order: { xs: 2, md: "initial" },
             flex: 1,
+            width: "100%",
             minWidth: 0,
             maxWidth: "100%",
             overflow: "hidden",

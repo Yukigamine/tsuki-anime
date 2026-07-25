@@ -24,7 +24,6 @@ async function fetchKitsuProfile(
         gender: true,
         name: true,
         slug: true,
-        siteLinks: [{ first: 20 }, { nodes: { url: true } }],
         favorites: [
           { first: 100 },
           {
@@ -61,8 +60,8 @@ async function fetchKitsuProfile(
           },
         ],
         stats: {
-          animeAmountConsumed: { media: true, time: true, units: true },
-          mangaAmountConsumed: { media: true, units: true },
+          animeAmountConsumed: { completed: true, time: true, units: true },
+          mangaAmountConsumed: { completed: true, units: true },
         },
         waifu: {
           id: true,
@@ -141,13 +140,12 @@ async function fetchKitsuProfile(
     createdAt: String(base.createdAt ?? ""),
     gender: (base.gender as string | null) ?? null,
     location: (base.location as string | null) ?? null,
-    website: base.siteLinks?.nodes?.[0]?.url ?? null,
     waifu,
     stats: {
       animeTimeSecs: base.stats?.animeAmountConsumed?.time ?? null,
-      animeSeries: base.stats?.animeAmountConsumed?.media ?? null,
+      animeCompleted: base.stats?.animeAmountConsumed?.completed ?? null,
       animeEpisodes: base.stats?.animeAmountConsumed?.units ?? null,
-      mangaSeries: base.stats?.mangaAmountConsumed?.media ?? null,
+      mangaCompleted: base.stats?.mangaAmountConsumed?.completed ?? null,
       mangaChapters: base.stats?.mangaAmountConsumed?.units ?? null,
     },
     favorites,

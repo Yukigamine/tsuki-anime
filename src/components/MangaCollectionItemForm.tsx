@@ -187,8 +187,10 @@ export function MangaCollectionItemForm({
       ? {
           kitsuId: initialData.kitsuId,
           rawId: "",
+          titleTranslated: initialData.titleEn ?? initialData.kitsuId,
           titleEn: initialData.titleEn ?? initialData.kitsuId,
           titleRomaji: null,
+          titleJp: null,
           posterUrl: null,
         }
       : null,

@@ -37,6 +37,7 @@ type Props = {
   mediaId: string | null;
   anilistId: number | null;
   initialDetail: MediaDetailSnapshot | null;
+  hasSession: boolean;
   listEntry: AnimeListEntry | MangaListEntry | null;
   collectionCount: number;
   collectionFormats?: string[];
@@ -122,6 +123,7 @@ export default function ProviderMediaDetailPage({
   mediaId,
   anilistId,
   initialDetail,
+  hasSession,
   listEntry,
   collectionCount,
   collectionFormats = [],
@@ -200,24 +202,26 @@ export default function ProviderMediaDetailPage({
         ) : null
       }
       quickActions={
-        mediaType === "anime" ? (
-          <AnimeDetailActions
-            animeId={mediaId}
-            kitsuId={kitsuId ?? ""}
-            title={title}
-            episodeCount={mediaCount}
-            entry={animeEntry}
-          />
-        ) : (
-          <MangaDetailActions
-            mangaId={mediaId}
-            kitsuId={kitsuId ?? ""}
-            title={title}
-            chapterCount={mediaCount}
-            volumeCount={initialDetail?.volumeCount ?? null}
-            entry={mangaEntry}
-          />
-        )
+        hasSession ? (
+          mediaType === "anime" ? (
+            <AnimeDetailActions
+              animeId={mediaId}
+              kitsuId={kitsuId ?? ""}
+              title={title}
+              episodeCount={mediaCount}
+              entry={animeEntry}
+            />
+          ) : (
+            <MangaDetailActions
+              mangaId={mediaId}
+              kitsuId={kitsuId ?? ""}
+              title={title}
+              chapterCount={mediaCount}
+              volumeCount={initialDetail?.volumeCount ?? null}
+              entry={mangaEntry}
+            />
+          )
+        ) : null
       }
       listStatus={
         listEntry ? (

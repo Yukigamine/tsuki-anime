@@ -11,21 +11,22 @@ type Props = { params: Promise<{ slug: string; kitsuId: string }> };
 
 export default async function MangaDetailPage({ params }: Props) {
   const { slug, kitsuId } = await params;
-  const session = await getSession();
-  const detail = await getMangaDetailSnapshot(kitsuId);
-  const manga =
-    session && detail
-      ? await prisma.manga.findFirst({
-          where: { id: detail.id },
-          select: {
-            id: true,
-            kitsuId: true,
-            anilistId: true,
-            listEntry: true,
-            collectionItems: true,
-          },
-        })
-      : null;
+  const [session, detail] = await Promise.all([
+    getSession(),
+    getMangaDetailSnapshot(kitsuId),
+  ]);
+  const manga = detail
+    ? await prisma.manga.findFirst({
+        where: { id: detail.id },
+        select: {
+          id: true,
+          kitsuId: true,
+          anilistId: true,
+          listEntry: true,
+          collectionItems: true,
+        },
+      })
+    : null;
 
   return (
     <ProviderMediaDetailPage
@@ -35,6 +36,7 @@ export default async function MangaDetailPage({ params }: Props) {
       mediaId={detail?.id ?? null}
       anilistId={detail?.anilistId ?? null}
       initialDetail={detail}
+      hasSession={Boolean(session)}
       listEntry={manga?.listEntry ?? null}
       collectionCount={manga?.collectionItems.length ?? 0}
       collectionItems={manga?.collectionItems ?? []}

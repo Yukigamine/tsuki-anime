@@ -6,8 +6,10 @@ import { kitsuBrowserClient } from "./browser-client";
 export type KitsuClientSearchResult = {
   kitsuId: string;
   rawId: string;
-  titleEn: string;
+  titleTranslated: string | null;
+  titleEn: string | null;
   titleRomaji: string | null;
+  titleJp: string | null;
   posterUrl: string | null;
 };
 
@@ -154,7 +156,12 @@ export async function searchAnimeByTitleClient(
         nodes: {
           id: true,
           slug: true,
-          titles: { canonical: true, romanized: true },
+          titles: {
+            canonical: true,
+            translated: true,
+            romanized: true,
+            original: true,
+          },
           posterImage: { original: { url: true } },
         },
       },
@@ -166,8 +173,10 @@ export async function searchAnimeByTitleClient(
     .map((n) => ({
       kitsuId: String(n?.id),
       rawId: String(n?.id),
-      titleEn: n?.titles?.canonical ?? n?.slug ?? String(n?.id),
+      titleTranslated: n?.titles?.translated ?? null,
+      titleEn: n?.titles?.canonical ?? null,
       titleRomaji: n?.titles?.romanized ?? null,
+      titleJp: n?.titles?.original ?? null,
       posterUrl: n?.posterImage?.original?.url ?? null,
     }));
 }
@@ -182,7 +191,12 @@ export async function searchMangaByTitleClient(
         nodes: {
           id: true,
           slug: true,
-          titles: { canonical: true, romanized: true },
+          titles: {
+            canonical: true,
+            translated: true,
+            romanized: true,
+            original: true,
+          },
           posterImage: { original: { url: true } },
         },
       },
@@ -194,8 +208,10 @@ export async function searchMangaByTitleClient(
     .map((n) => ({
       kitsuId: String(n?.id),
       rawId: String(n?.id),
-      titleEn: n?.titles?.canonical ?? n?.slug ?? String(n?.id),
+      titleTranslated: n?.titles?.translated ?? null,
+      titleEn: n?.titles?.canonical ?? null,
       titleRomaji: n?.titles?.romanized ?? null,
+      titleJp: n?.titles?.original ?? null,
       posterUrl: n?.posterImage?.original?.url ?? null,
     }));
 }

@@ -19,27 +19,15 @@ export default function AppleIcon() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#121212",
+        background: "#bde0fe",
       }}
     >
-      <div
-        style={{
-          width: "88%",
-          height: "88%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          borderRadius: "50%",
-          background: "#f4d35e",
-        }}
-      >
-        {/* biome-ignore lint/performance/noImgElement: ImageResponse requires an HTML image element. */}
-        <img
-          src={image}
-          alt="Tsuki Anime"
-          style={{ width: "148px", height: "148px" }}
-        />
-      </div>
+      {/* biome-ignore lint/performance/noImgElement: ImageResponse requires an HTML image element. */}
+      <img
+        src={image}
+        alt="Tsuki Anime"
+        style={{ width: "148px", height: "148px" }}
+      />
     </div>,
     size,
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { AnimeListEntry } from "@/generated/prisma/client";
 import type { AnimeWithEntry } from "@/lib/list";
@@ -8,7 +8,10 @@ import { getAnimeDetailPath } from "@/lib/media-routing";
 import AnimeCard from "./AnimeCard";
 import AnimeListEntryEditModal from "./AnimeListEntryEditModal";
 import CardSkeleton from "./CardSkeleton";
-import ListSearchField from "./ListSearchField";
+import type { ViewMode } from "./CollectionViewToggle";
+import ListAddButton from "./ListAddButton";
+import { MediaLibraryToolbar } from "./MediaLibraryToolbar";
+import { MediaListTable } from "./MediaListTable";
 
 type StatusTab =
   | "ALL"
@@ -30,12 +33,17 @@ const TABS: { value: StatusTab; label: string }[] = [
 export default function AnimeListClient({
   items,
   counts,
+  existingKitsuIds,
+  isAuthenticated,
 }: {
   items: AnimeWithEntry[];
   counts: Record<string, number>;
+  existingKitsuIds: string[];
+  isAuthenticated: boolean;
 }) {
   const [activeTab, setActiveTab] = useState<StatusTab>("ALL");
   const [search, setSearch] = useState("");
+  const [view, setView] = useState<ViewMode>("grid");
   const [selected, setSelected] = useState<AnimeWithEntry | null>(null);
   const [localItems, setLocalItems] = useState<AnimeWithEntry[]>(items);
   const [isPending, startTransition] = useTransition();
@@ -126,55 +134,27 @@ export default function AnimeListClient({
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { sm: "center" },
-          gap: 2,
-          mb: 3,
+      <MediaLibraryToolbar
+        tabs={TABS.map((tab) => ({ ...tab, count: counts[tab.value] }))}
+        activeTab={activeTab}
+        onTabChange={(tab) => {
+          startTransition(() => setActiveTab(tab));
         }}
-      >
-        <Tabs
-          value={activeTab}
-          onChange={(_, v) => {
-            startTransition(() => setActiveTab(v as StatusTab));
-          }}
-          variant="scrollable"
-          scrollButtons="auto"
-          sx={{ flex: 1, minHeight: 40 }}
-        >
-          {TABS.map(({ value, label }) => (
-            <Tab
-              key={value}
-              value={value}
-              label={
-                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                  {label}
-                  {counts[value] != null && (
-                    <Typography
-                      component="span"
-                      variant="caption"
-                      sx={{
-                        bgcolor: "action.selected",
-                        borderRadius: 1,
-                        px: 0.6,
-                        py: 0.1,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {counts[value]}
-                    </Typography>
-                  )}
-                </Box>
-              }
-              sx={{ minHeight: 40, textTransform: "none", fontWeight: 500 }}
-            />
-          ))}
-        </Tabs>
-
-        <ListSearchField onSearchChange={setSearch} />
-      </Box>
+        onSearchChange={setSearch}
+        view={view}
+        onViewChange={setView}
+        mobileAdd={
+          isAuthenticated ? (
+            <Box sx={{ display: { xs: "block", md: "none" } }}>
+              <ListAddButton
+                type="anime"
+                existingKitsuIds={existingKitsuIds}
+                iconOnly
+              />
+            </Box>
+          ) : undefined
+        }
+      />
 
       {isPending ? (
         <Grid container spacing={2}>
@@ -194,7 +174,7 @@ export default function AnimeListClient({
             </Typography>
           )}
         </Box>
-      ) : (
+      ) : view === "grid" ? (
         <Grid container spacing={2}>
           {filtered.map((item) => (
             <Grid key={item.id} size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
@@ -202,10 +182,18 @@ export default function AnimeListClient({
                 item={item}
                 detailHref={getAnimeDetailPath(item)}
                 onEdit={(next) => setSelected(next)}
+                canEdit={isAuthenticated}
               />
             </Grid>
           ))}
         </Grid>
+      ) : (
+        <MediaListTable
+          type="anime"
+          items={filtered}
+          onEdit={setSelected}
+          canEdit={isAuthenticated}
+        />
       )}
 
       {selected && (

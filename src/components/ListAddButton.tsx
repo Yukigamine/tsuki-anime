@@ -7,6 +7,8 @@ import {
   CircularProgress,
   DialogActions,
   DialogContent,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -24,9 +26,14 @@ import {
 type Props = {
   type: "anime" | "manga";
   existingKitsuIds: string[];
+  iconOnly?: boolean;
 };
 
-export default function ListAddButton({ type, existingKitsuIds }: Props) {
+export default function ListAddButton({
+  type,
+  existingKitsuIds,
+  iconOnly = false,
+}: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<KitsuSearchResult | null>(null);
@@ -73,7 +80,15 @@ export default function ListAddButton({ type, existingKitsuIds }: Props) {
         }
         setResolved({
           id: result.data,
-          title: payload.titleEn ?? value.titleEn,
+          title:
+            value.titleTranslated ??
+            payload.titleEn ??
+            payload.titleRomaji ??
+            payload.titleJp ??
+            value.titleEn ??
+            value.titleRomaji ??
+            value.titleJp ??
+            "Unknown",
           episodeCount: payload.episodeCount ?? null,
           chapterCount: null,
           volumeCount: null,
@@ -91,7 +106,15 @@ export default function ListAddButton({ type, existingKitsuIds }: Props) {
         }
         setResolved({
           id: result.data,
-          title: payload.titleEn ?? value.titleEn,
+          title:
+            value.titleTranslated ??
+            payload.titleEn ??
+            payload.titleRomaji ??
+            payload.titleJp ??
+            value.titleEn ??
+            value.titleRomaji ??
+            value.titleJp ??
+            "Unknown",
           episodeCount: null,
           chapterCount: payload.chapterCount ?? null,
           volumeCount: payload.volumeCount ?? null,
@@ -106,14 +129,34 @@ export default function ListAddButton({ type, existingKitsuIds }: Props) {
 
   return (
     <>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => setOpen(true)}
-        sx={{ width: "fit-content", whiteSpace: "nowrap" }}
-      >
-        Add
-      </Button>
+      {iconOnly ? (
+        <Tooltip title={`Add ${type} to list`}>
+          <IconButton
+            aria-label={`Add ${type} to list`}
+            onClick={() => setOpen(true)}
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "10px",
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              "&:hover": { bgcolor: "primary.dark" },
+            }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpen(true)}
+          aria-label={`Add ${type} to list`}
+          sx={{ width: "fit-content", whiteSpace: "nowrap" }}
+        >
+          Add
+        </Button>
+      )}
 
       <DialogContainer
         open={open && resolved === null}

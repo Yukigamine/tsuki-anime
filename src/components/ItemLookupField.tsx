@@ -29,7 +29,12 @@ export function ItemLookupField({
   disabled = false,
   initialValue = null,
 }: Props) {
-  const [inputValue, setInputValue] = useState(initialValue?.titleEn ?? "");
+  const [inputValue, setInputValue] = useState(
+    initialValue?.titleTranslated ??
+      initialValue?.titleEn ??
+      initialValue?.titleRomaji ??
+      "",
+  );
   const [options, setOptions] = useState<KitsuSearchResult[]>(
     initialValue ? [initialValue] : [],
   );
@@ -39,7 +44,12 @@ export function ItemLookupField({
 
   useEffect(() => {
     if (disabled) return;
-    if (!inputValue.trim() || inputValue === value?.titleEn) {
+    if (
+      !inputValue.trim() ||
+      inputValue === value?.titleTranslated ||
+      inputValue === value?.titleEn ||
+      inputValue === value?.titleRomaji
+    ) {
       if (!inputValue.trim()) setOptions([]);
       return;
     }
@@ -63,7 +73,14 @@ export function ItemLookupField({
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [inputValue, type, disabled, value?.titleEn]);
+  }, [
+    inputValue,
+    type,
+    disabled,
+    value?.titleTranslated,
+    value?.titleEn,
+    value?.titleRomaji,
+  ]);
 
   return (
     <Autocomplete<KitsuSearchResult>
@@ -73,7 +90,9 @@ export function ItemLookupField({
       value={value}
       inputValue={inputValue}
       filterOptions={(x) => x}
-      getOptionLabel={(o) => o.titleEn}
+      getOptionLabel={(o) =>
+        o.titleTranslated ?? o.titleEn ?? o.titleRomaji ?? o.titleJp ?? ""
+      }
       getOptionKey={(o) => o.kitsuId.toString()}
       isOptionEqualToValue={(o, v) => o.kitsuId === v.kitsuId}
       onChange={(_, newValue) => {
@@ -93,7 +112,13 @@ export function ItemLookupField({
             {option.posterUrl ? (
               <Avatar
                 src={option.posterUrl}
-                alt={option.titleEn}
+                alt={
+                  option.titleTranslated ??
+                  option.titleEn ??
+                  option.titleRomaji ??
+                  option.titleJp ??
+                  ""
+                }
                 variant="rounded"
                 sx={{ width: 36, height: 52, flexShrink: 0 }}
               />
@@ -107,13 +132,19 @@ export function ItemLookupField({
             )}
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                {option.titleEn}
+                {option.titleTranslated ??
+                  option.titleEn ??
+                  option.titleRomaji ??
+                  option.titleJp}
               </Typography>
-              {option.titleRomaji && option.titleRomaji !== option.titleEn && (
-                <Typography variant="caption" color="text.secondary">
-                  {option.titleRomaji}
-                </Typography>
-              )}
+              {(option.titleTranslated ?? option.titleEn) &&
+                option.titleRomaji &&
+                option.titleRomaji !==
+                  (option.titleTranslated ?? option.titleEn) && (
+                  <Typography variant="caption" color="text.secondary">
+                    {option.titleRomaji}
+                  </Typography>
+                )}
             </Box>
           </Box>
         );

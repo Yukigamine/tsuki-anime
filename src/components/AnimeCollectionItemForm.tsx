@@ -114,8 +114,10 @@ export function AnimeCollectionItemForm({ initialData, seriesDetail }: Props) {
       ? {
           kitsuId: initialData.kitsuId,
           rawId: "",
+          titleTranslated: initialData.titleEn ?? initialData.kitsuId,
           titleEn: initialData.titleEn ?? initialData.kitsuId,
           titleRomaji: null,
+          titleJp: null,
           posterUrl: null,
         }
       : null,
@@ -131,10 +133,10 @@ export function AnimeCollectionItemForm({ initialData, seriesDetail }: Props) {
     initialData?.condition ?? "GOOD",
   );
   const [notes, setNotes] = useState(initialData?.notes ?? "");
-  const [purchasedAt, setPurchasedAt] = useState(
+  const [purchasedAt, setPurchasedAt] = useState<string | null>(
     initialData?.purchasedAt
       ? initialData.purchasedAt.toISOString().slice(0, 10)
-      : "",
+      : null,
   );
   const [pricePaid, setPricePaid] = useState(
     initialData?.pricePaid != null ? String(initialData.pricePaid) : "",
@@ -286,8 +288,8 @@ export function AnimeCollectionItemForm({ initialData, seriesDetail }: Props) {
         <TextField
           label="Purchased date"
           type="date"
-          value={purchasedAt}
-          onChange={(e) => setPurchasedAt(e.target.value)}
+          value={purchasedAt ?? ""}
+          onChange={(e) => setPurchasedAt(e.target.value || null)}
           slotProps={{ inputLabel: { shrink: true } }}
         />
 

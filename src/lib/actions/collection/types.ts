@@ -12,8 +12,10 @@ export type ActionResult<T = void> =
 export type KitsuSearchResult = {
   kitsuId: string;
   rawId: string;
-  titleEn: string;
+  titleTranslated: string | null;
+  titleEn: string | null;
   titleRomaji: string | null;
+  titleJp: string | null;
   posterUrl: string | null;
 };
 

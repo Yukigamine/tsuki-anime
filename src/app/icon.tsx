@@ -30,7 +30,7 @@ export default function Icon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: "50%",
-          background: "#f4d35e",
+          background: "#bde0fe",
         }}
       >
         {/* biome-ignore lint/performance/noImgElement: ImageResponse requires an HTML image element. */}

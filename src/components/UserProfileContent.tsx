@@ -20,10 +20,10 @@ import UserFavorites from "@/components/UserFavorites";
 import { useKitsuProfile } from "@/lib/hooks/useKitsuProfile";
 import {
   ageFromBirthday,
-  formatElapsedSince,
   formatProfileDate,
   formatWatchTime,
 } from "@/lib/kitsu/user-types";
+import type { ProfileSummary } from "@/lib/profile-summary";
 
 function DetailRow({
   label,
@@ -61,7 +61,15 @@ function DetailRow({
   );
 }
 
-export default function UserProfileContent({ username }: { username: string }) {
+export default function UserProfileContent({
+  username,
+  linkedAccounts,
+  profileSummary,
+}: {
+  username: string;
+  linkedAccounts?: { kitsu: string | null; anilist: string | null };
+  profileSummary?: ProfileSummary;
+}) {
   const { data: profile, error, isLoading } = useKitsuProfile(username);
 
   useEffect(() => {
@@ -102,14 +110,23 @@ export default function UserProfileContent({ username }: { username: string }) {
     );
   }
 
-  const joinedDate = formatProfileDate(profile.createdAt);
-  const joinedElapsed = formatElapsedSince(profile.createdAt);
   const birthdayFormatted = profile.birthday
     ? `${formatProfileDate(profile.birthday)} (age ${ageFromBirthday(profile.birthday)})`
     : null;
+  const mangaOwnedParts = profileSummary
+    ? [
+        profileSummary.mangaVolumesOwned > 0
+          ? `${profileSummary.mangaVolumesOwned.toLocaleString()} volumes`
+          : null,
+        profileSummary.mangaChaptersOwned > 0
+          ? `${profileSummary.mangaChaptersOwned.toLocaleString()} chapters`
+          : null,
+      ].filter((part): part is string => part !== null)
+    : [];
 
   const hasStats =
-    profile.stats.animeSeries != null || profile.stats.mangaSeries != null;
+    profile.stats.animeCompleted != null ||
+    profile.stats.mangaCompleted != null;
   const hasFavorites = Object.values(profile.favorites).some(
     (arr) => arr.length > 0,
   );
@@ -138,20 +155,6 @@ export default function UserProfileContent({ username }: { username: string }) {
       )}
 
       <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, mb: 3 }}>
-          About{" "}
-          <Link
-            href={`https://kitsu.app/users/${profile.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            underline="hover"
-            color="inherit"
-            title="View profile on Kitsu"
-          >
-            {profile.name}
-          </Link>
-        </Typography>
-
         <Box
           sx={{
             display: "flex",
@@ -191,16 +194,41 @@ export default function UserProfileContent({ username }: { username: string }) {
                     />
                   </Box>
                 )}
-                <Box>
+                <Box sx={{ minWidth: 0 }}>
                   <Typography
                     variant="h6"
                     sx={{ fontWeight: 700, lineHeight: 1.2 }}
                   >
                     {profile.name}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    @{profile.slug}
-                  </Typography>
+                  <Box
+                    sx={{ display: "flex", flexDirection: "column", mt: 0.75 }}
+                  >
+                    {linkedAccounts?.kitsu && (
+                      <Link
+                        href={`https://kitsu.app/users/${encodeURIComponent(linkedAccounts.kitsu)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        Kitsu: @{linkedAccounts.kitsu}
+                      </Link>
+                    )}
+                    {linkedAccounts?.anilist && (
+                      <Link
+                        href={`https://anilist.co/user/${encodeURIComponent(linkedAccounts.anilist)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        underline="hover"
+                        variant="caption"
+                        color="text.secondary"
+                      >
+                        AniList: @{linkedAccounts.anilist}
+                      </Link>
+                    )}
+                  </Box>
                 </Box>
               </Box>
               {profile.about && (
@@ -217,12 +245,6 @@ export default function UserProfileContent({ username }: { username: string }) {
             <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
               <Table size="small" sx={{ tableLayout: "fixed", width: "100%" }}>
                 <TableBody>
-                  <DetailRow label="Joined">
-                    <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      <span>{joinedDate}</span>
-                      <span>({joinedElapsed} ago)</span>
-                    </Box>
-                  </DetailRow>
                   {birthdayFormatted && (
                     <DetailRow label="Birthday">{birthdayFormatted}</DetailRow>
                   )}
@@ -232,19 +254,19 @@ export default function UserProfileContent({ username }: { username: string }) {
                   {profile.location && (
                     <DetailRow label="Location">{profile.location}</DetailRow>
                   )}
-                  {profile.website && (
-                    <DetailRow label="Website">
-                      <Link
-                        href={profile.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        underline="hover"
-                        variant="body2"
-                        sx={{ whiteSpace: "nowrap" }}
-                      >
-                        {profile.website}
-                      </Link>
-                    </DetailRow>
+                  {profileSummary && (
+                    <>
+                      {profileSummary.animeOwned > 0 && (
+                        <DetailRow label="Anime Owned">
+                          {profileSummary.animeOwned.toLocaleString()}
+                        </DetailRow>
+                      )}
+                      {mangaOwnedParts.length > 0 && (
+                        <DetailRow label="Manga Owned">
+                          {mangaOwnedParts.join(" · ")}
+                        </DetailRow>
+                      )}
+                    </>
                   )}
                   {profile.waifu && (
                     <DetailRow label={profile.waifu.label}>
@@ -289,6 +311,11 @@ export default function UserProfileContent({ username }: { username: string }) {
                       </Box>
                     </DetailRow>
                   )}
+                  {profileSummary?.favoriteGenres.length ? (
+                    <DetailRow label="Favorite Genres">
+                      {profileSummary.favoriteGenres.join(", ")}
+                    </DetailRow>
+                  ) : null}
                 </TableBody>
               </Table>
             </Paper>
@@ -308,9 +335,9 @@ export default function UserProfileContent({ username }: { username: string }) {
                         {formatWatchTime(profile.stats.animeTimeSecs)}
                       </DetailRow>
                     )}
-                    {profile.stats.animeSeries != null && (
-                      <DetailRow label="Anime series">
-                        {profile.stats.animeSeries.toLocaleString()}
+                    {profile.stats.animeCompleted != null && (
+                      <DetailRow label="Anime Completed">
+                        {profile.stats.animeCompleted.toLocaleString()}
                       </DetailRow>
                     )}
                     {profile.stats.animeEpisodes != null && (
@@ -318,9 +345,9 @@ export default function UserProfileContent({ username }: { username: string }) {
                         {profile.stats.animeEpisodes.toLocaleString()}
                       </DetailRow>
                     )}
-                    {profile.stats.mangaSeries != null && (
-                      <DetailRow label="Manga series">
-                        {profile.stats.mangaSeries.toLocaleString()}
+                    {profile.stats.mangaCompleted != null && (
+                      <DetailRow label="Manga Completed">
+                        {profile.stats.mangaCompleted.toLocaleString()}
                       </DetailRow>
                     )}
                     {profile.stats.mangaChapters != null && (

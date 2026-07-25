@@ -58,7 +58,11 @@ export default function ListSearchField({ onSearchChange }: Props) {
           ) : undefined,
         },
       }}
-      sx={{ width: { xs: "100%", sm: 360 }, maxWidth: "100%" }}
+      sx={{
+        width: { xs: "auto", sm: 360 },
+        flex: { xs: 1, sm: "initial" },
+        maxWidth: "100%",
+      }}
     />
   );
 }

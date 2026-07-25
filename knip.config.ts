@@ -1,7 +1,7 @@
 import type { KnipConfig } from "knip";
 
 const config: KnipConfig = {
-  ignore: ["src/lib/zeus/**"],
+  ignore: ["src/lib/zeus/**", "src/app/sw.ts"],
   ignoreDependencies: [
     "@neondatabase/serverless",
     "@prisma/client",
