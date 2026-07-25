@@ -1,3 +1,6 @@
+import "server-only";
+import { getSettings } from "@/lib/settings";
+
 export type MediaType = "anime" | "manga";
 export type LibraryType = "list" | "collection";
 
@@ -12,5 +15,3 @@ export async function getLibraryPageTitle(
 
   return displayName ? `${displayName}'s ${title}` : title;
 }
-import "server-only";
-import { getSettings } from "@/lib/settings";
