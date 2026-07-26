@@ -10,12 +10,16 @@ const envFiles = [
   ".env.local",
   ".env.development",
   ".env",
+  "../../.env.development.local",
+  "../../.env.local",
+  "../../.env.development",
+  "../../.env",
 ];
 
 for (const file of envFiles) {
   const filePath = path.resolve(process.cwd(), file);
   if (existsSync(filePath)) {
-    dotenv.config({ path: filePath });
+    dotenv.config({ path: filePath, quiet: true });
   }
 }
 

@@ -153,10 +153,10 @@ importers:
       '@mui/material-nextjs':
         specifier: 9.0.1
         version: 9.0.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6))(@types/react@19.2.15)(next@16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
-      '@suki-media/providers':
+      '@tsuki-media/providers':
         specifier: workspace:*
         version: link:../../packages/providers
-      '@suki-media/ui':
+      '@tsuki-media/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -178,6 +178,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.15)
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       typescript:
         specifier: 6.0.3
         version: 6.0.3
@@ -199,10 +202,10 @@ importers:
       '@mui/material-nextjs':
         specifier: 9.0.1
         version: 9.0.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.15)(react@19.2.6))(@types/react@19.2.15)(next@16.2.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react@19.2.6)
-      '@suki-media/providers':
+      '@tsuki-media/providers':
         specifier: workspace:*
         version: link:../../packages/providers
-      '@suki-media/ui':
+      '@tsuki-media/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -224,6 +227,9 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.15)
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       typescript:
         specifier: 6.0.3
         version: 6.0.3

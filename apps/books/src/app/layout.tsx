@@ -1,8 +1,8 @@
-import { MediaAppShell, MediaProviders } from "@suki-media/ui";
+import { MediaAppShell, MediaProviders } from "@tsuki-media/ui";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Suki Books",
+  title: "Tsuki Books",
   description: "A personal book collection powered by Hardcover",
 };
 
@@ -13,7 +13,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <MediaProviders>
-          <MediaAppShell title="Suki Books">{children}</MediaAppShell>
+          <MediaAppShell title="Tsuki Books">{children}</MediaAppShell>
         </MediaProviders>
       </body>
     </html>

@@ -1,4 +1,4 @@
-# Build the existing anime/manga app from the Suki Media workspace.
+# Build the existing anime/manga app from the Tsuki Media workspace.
 FROM node:24-alpine AS builder
 
 WORKDIR /app
@@ -6,7 +6,7 @@ RUN npm install -g pnpm
 
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @suki-media/anime deploy
+RUN pnpm --filter @tsuki-media/anime deploy
 
 FROM node:24-alpine
 
@@ -22,4 +22,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
-CMD ["pnpm", "--filter", "@suki-media/anime", "start"]
+CMD ["pnpm", "--filter", "@tsuki-media/anime", "start"]

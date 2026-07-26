@@ -1,4 +1,4 @@
-import { searchTmdbMovies } from "@suki-media/providers/tmdb";
+import { searchTmdbMovies } from "@tsuki-media/providers/tmdb";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

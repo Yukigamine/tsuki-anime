@@ -1,57 +1,38 @@
-# Suki Media
+# Tsuki Media
 
-Suki Media is a pnpm monorepo for personal media collections.
+Tsuki Media is a pnpm monorepo for personal media collections.
 
-## Apps
+## Applications
 
-| App | Development URL | Data provider | Features |
-| --- | --- | --- | --- |
-| Anime | http://localhost:3000 | Kitsu and AniList | Existing anime and manga lists and collections |
-| Books | http://localhost:3001 | Hardcover GraphQL | Book search and browser-local collection |
-| Movies | http://localhost:3002 | TMDB REST | Movie search and browser-local collection |
+| App | Development URL | Documentation |
+| --- | --- | --- |
+| Anime and manga | http://localhost:3000 | [apps/anime](apps/anime/README.md) |
+| Books | http://localhost:3001 | [apps/books](apps/books/README.md) |
+| Movies | http://localhost:3002 | [apps/movies](apps/movies/README.md) |
 
-The original anime/manga application lives unchanged in `apps/anime`. The books
-and movies apps share their collection page, app shell, theme, and provider
-response types through packages in `packages/`.
+Shared provider clients and UI components live in `packages/providers` and
+`packages/ui`.
 
 ## Setup
 
-Install dependencies:
-
 ```bash
 pnpm install
+cp .env.example .env
 ```
 
-Copy `.env.example` to `.env` and configure the services you use. Book search
-requires `HARDCOVER_API_TOKEN`; movie search requires `TMDB_API_TOKEN`. Tokens
-are read only by server-side API routes and are never sent to the browser.
+Each application has its own `.env.example`. Copy it to `.env` in that app's
+directory and configure its credentials. App values take precedence over
+shared root values.
 
-## Development
-
-```bash
-pnpm dev          # anime/manga app
-pnpm dev:books    # books app
-pnpm dev:movies   # movies app
-pnpm dev:all      # all apps
-```
-
-## Validation
+## Workspace commands
 
 ```bash
+pnpm dev:all
+pnpm build
 pnpm test
 pnpm typecheck
 pnpm lint-check
-pnpm build
 ```
 
-## Workspace layout
-
-```text
-apps/
-  anime/    Existing anime and manga application
-  books/    Hardcover-backed book collection
-  movies/   TMDB-backed movie collection
-packages/
-  providers/  Server API clients and response normalization
-  ui/         Shared collection UI, app shell, and theme
-```
+See each application README for individual development, build, and deployment
+commands.

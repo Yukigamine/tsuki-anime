@@ -1,4 +1,4 @@
-import { searchHardcoverBooks } from "@suki-media/providers/hardcover";
+import { searchHardcoverBooks } from "@tsuki-media/providers/hardcover";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
