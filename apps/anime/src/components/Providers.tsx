@@ -15,6 +15,7 @@ import {
   SnackbarContent,
   type SnackbarKey,
   SnackbarProvider,
+  type SnackbarProviderProps,
   useSnackbar,
 } from "notistack";
 import { forwardRef } from "react";
@@ -121,6 +122,9 @@ const WarningSnackbar = forwardRef<HTMLDivElement, CustomContentProps>(
 );
 WarningSnackbar.displayName = "WarningSnackbar";
 
+const CompatibleSnackbarProvider =
+  SnackbarProvider as unknown as React.ComponentType<SnackbarProviderProps>;
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SerwistProvider swUrl="/serwist/sw.js">
@@ -139,7 +143,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
               },
             }}
           />
-          <SnackbarProvider
+          <CompatibleSnackbarProvider
             maxSnack={3}
             anchorOrigin={{
               vertical: "top",
@@ -154,7 +158,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             }}
           >
             <SWRProvider>{children}</SWRProvider>
-          </SnackbarProvider>
+          </CompatibleSnackbarProvider>
         </ThemeProvider>
       </AppRouterCacheProvider>
     </SerwistProvider>

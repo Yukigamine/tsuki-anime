@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "next dev --turbopack --port 3002",
     "build": "next build --turbopack",
-    "deploy": "next build --turbopack",
+    "generate": "prisma generate",
+    "deploy": "prisma generate && prisma migrate deploy && next build --turbopack",
+    "db-edit": "prisma studio",
+    "db-init": "prisma migrate reset",
     "start": "next start --port 3002",
     "typecheck": "tsc --noEmit"
   },
@@ -16,6 +19,7 @@
     "@mui/icons-material": "9.0.1",
     "@mui/material": "9.0.1",
     "@mui/material-nextjs": "9.0.1",
+    "@prisma/client": "7.8.0",
     "@tsuki-media/providers": "workspace:*",
     "@tsuki-media/ui": "workspace:*",
     "next": "16.2.6",
@@ -27,6 +31,7 @@
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
     "dotenv": "17.4.2",
+    "prisma": "7.8.0",
     "typescript": "6.0.3"
   }
 }

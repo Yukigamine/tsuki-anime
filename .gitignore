@@ -37,6 +37,8 @@ yarn-error.log*
 next-env.d.ts
 
 apps/anime/src/generated/prisma
+apps/books/src/generated/prisma
+apps/movies/src/generated/prisma
 apps/anime/public/*.tar
 apps/anime/public/sw.js
 apps/anime/public/workbox-*.js

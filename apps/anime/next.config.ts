@@ -24,7 +24,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  turbopack: {
+    root: path.resolve(import.meta.dirname, "../.."),
+  },
   reactStrictMode: true,
   trailingSlash: false,
   images: {
