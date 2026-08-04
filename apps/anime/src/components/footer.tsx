@@ -37,7 +37,7 @@ export default function Footer() {
             © {new Date().getFullYear()}
           </Typography>
           <Link
-            href="https://github.com/Yukigamine/tsuki-anime"
+            href="https://github.com/Yukigamine/tsuki-media"
             target="_blank"
             rel="noopener noreferrer"
             underline="hover"

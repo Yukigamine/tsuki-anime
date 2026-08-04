@@ -5,8 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: tsuki-anime-app
-    env_file: .env
+    container_name: tsuki-media-anime
+    env_file:
+      - .env
+      - apps/anime/.env
     ports:
       - "3000:3000"
     depends_on:
@@ -17,16 +19,16 @@ services:
     environment:
       NODE_ENV: production
     networks:
-      - anime-network
+      - media-network
 
   postgres:
     image: postgres:17-alpine
-    container_name: tsuki-anime-db
+    container_name: tsuki-media-db
     env_file: .env
     environment:
       POSTGRES_USER: ${DATABASE_USER:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      POSTGRES_DB: ${DATABASE_NAME:-tsuki_anime}
+      POSTGRES_DB: ${DATABASE_NAME:-tsuki_media}
     ports:
       - "5432:5432"
     volumes:
@@ -37,11 +39,11 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - anime-network
+      - media-network
 
   redis:
     image: redis:7-alpine
-    container_name: tsuki-anime-cache
+    container_name: tsuki-media-cache
     env_file: .env
     ports:
       - "6379:6379"
@@ -54,12 +56,12 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - anime-network
+      - media-network
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  anime-network:
+  media-network:
     driver: bridge
