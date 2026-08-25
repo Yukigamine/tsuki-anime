@@ -64,7 +64,7 @@
     "esbuild": "0.28.0",
     "graphql-zeus": "7.2.1",
     "husky": "9.1.7",
-    "knip": "6.14.2",
+    "knip": "6.32.2",
     "lint-staged": "17.0.5",
     "server-only": "0.0.1",
     "serwist": "9.5.11",
