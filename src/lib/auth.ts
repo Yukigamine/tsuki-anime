@@ -1,11 +1,10 @@
 import "server-only";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { genericOAuth } from "better-auth/plugins";
+import { genericOAuth, username } from "better-auth/plugins";
 import { getServerBaseUrl } from "@/lib/base-url";
 import prisma from "@/lib/prisma";
 
-const AUTHORIZED_EMAIL = process.env.AUTHORIZED_EMAIL;
 const APP_URL = getServerBaseUrl();
 
 const customOAuthPlugin =
@@ -42,6 +41,7 @@ const customOAuthPlugin =
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   baseURL: APP_URL,
+  emailAndPassword: { enabled: true },
 
   socialProviders: {
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -78,28 +78,31 @@ export const auth = betterAuth({
       : {}),
   },
 
-  plugins: [...(customOAuthPlugin ? [customOAuthPlugin] : [])],
+  plugins: [username(), ...(customOAuthPlugin ? [customOAuthPlugin] : [])],
 
   databaseHooks: {
     user: {
       create: {
         before: async (user) => {
           const existingUser = await prisma.user.findFirst({
-            select: { id: true, email: true },
+            select: { id: true },
           });
+          const settings = await prisma.settings.findUnique({
+            where: { id: "app" },
+            select: { masterEmail: true },
+          });
+          const authorizedEmail =
+            settings?.masterEmail || process.env.AUTHORIZED_EMAIL;
 
-          if (
-            existingUser &&
-            existingUser.email.toLowerCase() !== user.email.toLowerCase()
-          ) {
+          if (existingUser) {
             throw new Error(
               "Access denied: this app instance only allows a single user identity.",
             );
           }
 
           if (
-            AUTHORIZED_EMAIL &&
-            user.email.toLowerCase() !== AUTHORIZED_EMAIL.toLowerCase()
+            authorizedEmail &&
+            user.email.toLowerCase() !== authorizedEmail.toLowerCase()
           ) {
             throw new Error(
               `Access denied: ${user.email} is not authorized to use this app.`,
