@@ -1,5 +1,17 @@
+import path from "node:path";
 import { withSerwist } from "@serwist/turbopack";
+import dotenv from "dotenv";
 import type { NextConfig } from "next";
+
+dotenv.config({
+  path: [
+    path.join(import.meta.dirname, ".env.local"),
+    path.join(import.meta.dirname, ".env"),
+    path.join(import.meta.dirname, "../../.env.local"),
+    path.join(import.meta.dirname, "../../.env"),
+  ],
+  quiet: true,
+});
 
 const securityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -12,7 +24,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  turbopack: {},
+  turbopack: {
+    root: path.resolve(import.meta.dirname, "../.."),
+  },
   reactStrictMode: true,
   trailingSlash: false,
   images: {

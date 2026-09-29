@@ -10,7 +10,7 @@ export default function SWRProvider({
   return (
     <SWRConfig
       value={{
-        onError: (error) => {
+        onError: (error: unknown) => {
           console.error("[SWR]", error);
         },
       }}
