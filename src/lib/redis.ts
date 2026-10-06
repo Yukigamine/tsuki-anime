@@ -5,13 +5,28 @@ let redis: ReturnType<typeof createClient> | undefined;
 let connectPromise: Promise<ReturnType<typeof createClient>> | undefined;
 
 async function getRedis() {
+  if (!process.env.REDIS_URL) throw new Error("REDIS_URL is not configured");
+  if (redis && !redis.isOpen) {
+    redis = undefined;
+    connectPromise = undefined;
+  }
   if (!redis) {
-    redis = createClient({ url: process.env.REDIS_URL });
+    redis = createClient({
+      url: process.env.REDIS_URL,
+      socket: { connectTimeout: 5000, reconnectStrategy: false },
+      disableOfflineQueue: true,
+    });
     redis.on("error", (err) => console.error("[redis] error:", err));
     connectPromise = redis.connect();
   }
 
-  await connectPromise;
+  try {
+    await connectPromise;
+  } catch (err) {
+    redis = undefined;
+    connectPromise = undefined;
+    throw err;
+  }
   return redis;
 }
 
@@ -26,8 +41,8 @@ export const MANGA_TITLE_KEY = "manga:title";
 
 // ─── TTLs ─────────────────────────────────────────────────────────────────────
 
-export const LIST_TTL = 60 * 5; // 5 minutes
-export const TITLE_TTL = 60 * 30; // 30 minutes
+export const LIST_TTL = 60 * 60 * 24; // Writes invalidate the shared library.
+export const TITLE_TTL = 60 * 60 * 24;
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
@@ -56,12 +71,55 @@ export async function setCached<T>(
   }
 }
 
-async function deleteCached(key: string): Promise<void> {
+export async function deleteCached(key: string): Promise<void> {
   try {
     const r = await getRedis();
     await r.del(key);
   } catch (err) {
     console.error(`[cache] Failed to delete ${key}:`, err);
+  }
+}
+
+const LIBRARY_KEY = "library:v1:all";
+const LIBRARY_REVISION_KEY = "library:v1:revision";
+
+export async function getLibraryRevision(): Promise<string | null> {
+  try {
+    return (await (await getRedis()).get(LIBRARY_REVISION_KEY)) ?? "0";
+  } catch (err) {
+    console.error("[cache] Failed to read library revision:", err);
+    return null;
+  }
+}
+
+export async function cacheLibrary(
+  value: unknown,
+  revision: string,
+): Promise<void> {
+  try {
+    const r = await getRedis();
+    // An edit during a cold-cache rebuild must not publish an outdated snapshot.
+    await r.eval(
+      `if (redis.call('GET', KEYS[1]) or '0') == ARGV[1] then
+        return redis.call('SET', KEYS[2], ARGV[2], 'EX', ARGV[3])
+      end
+      return nil`,
+      {
+        keys: [LIBRARY_REVISION_KEY, LIBRARY_KEY],
+        arguments: [revision, JSON.stringify(value), String(LIST_TTL)],
+      },
+    );
+  } catch (err) {
+    console.error("[cache] Failed to cache library:", err);
+  }
+}
+
+async function invalidateLibraryCache(): Promise<void> {
+  try {
+    const r = await getRedis();
+    await r.multi().incr(LIBRARY_REVISION_KEY).del(LIBRARY_KEY).exec();
+  } catch (err) {
+    console.error("[cache] Failed to invalidate library:", err);
   }
 }
 
@@ -78,10 +136,12 @@ async function invalidateByPrefix(prefix: string): Promise<void> {
 // ─── Invalidation ────────────────────────────────────────────────────────────
 
 export async function invalidateAnimeListCache(): Promise<void> {
+  await invalidateLibraryCache();
   await invalidateByPrefix(ANIME_LIST_KEY);
 }
 
 export async function invalidateMangaListCache(): Promise<void> {
+  await invalidateLibraryCache();
   await invalidateByPrefix(MANGA_LIST_KEY);
 }
 
@@ -89,6 +149,7 @@ export async function invalidateAnimeTitleCache(
   id: string,
   kitsuId: string | null,
 ): Promise<void> {
+  await invalidateLibraryCache();
   await Promise.all(
     [id, kitsuId]
       .filter((identifier): identifier is string => identifier !== null)
@@ -100,6 +161,7 @@ export async function invalidateMangaTitleCache(
   id: string,
   kitsuId: string | null,
 ): Promise<void> {
+  await invalidateLibraryCache();
   await Promise.all(
     [id, kitsuId]
       .filter((identifier): identifier is string => identifier !== null)
@@ -109,6 +171,7 @@ export async function invalidateMangaTitleCache(
 
 /** Invalidates both anime and manga list caches (use after a full sync). */
 export async function invalidateListCache(): Promise<void> {
+  await invalidateLibraryCache();
   await Promise.all([
     invalidateByPrefix(ANIME_LIST_KEY),
     invalidateByPrefix(MANGA_LIST_KEY),

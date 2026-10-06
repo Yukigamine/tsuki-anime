@@ -113,6 +113,8 @@ export async function finishKitsuSyncLogAction(input: {
       },
     });
 
+    await invalidateListCache();
+
     await Promise.all([
       revalidatePath("/sync"),
       revalidatePath("/list/anime"),

@@ -1,6 +1,6 @@
 import "server-only";
 
-import prisma from "@/lib/prisma";
+import { getLibrarySnapshot } from "@/lib/library";
 import { Thunder, UserStatisticsSort } from "@/lib/zeus/anilist";
 
 const ANILIST_GRAPHQL =
@@ -90,13 +90,15 @@ async function getFavoriteGenres(username: string | null): Promise<string[]> {
 export async function getProfileSummary(
   anilistUsername: string | null,
 ): Promise<ProfileSummary> {
-  const [favoriteGenres, animeOwned, mangaItems] = await Promise.all([
+  const [favoriteGenres, library] = await Promise.all([
     getFavoriteGenres(anilistUsername),
-    prisma.animeCollectionItem.count(),
-    prisma.mangaCollectionItem.findMany({
-      select: { volumes: true, chapters: true },
-    }),
+    getLibrarySnapshot(),
   ]);
+  const animeOwned = library.anime.reduce(
+    (total, item) => total + item.collectionItems.length,
+    0,
+  );
+  const mangaItems = library.manga.flatMap((item) => item.collectionItems);
 
   return {
     favoriteGenres,

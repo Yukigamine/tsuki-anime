@@ -59,7 +59,6 @@ export async function triggerSyncAction(
     direction === "PULL"
       ? await pullAniList(log.id)
       : await pushAniList(log.id);
-    await invalidateListCache();
     return { ok: true, data: { logId: log.id } };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -68,6 +67,9 @@ export async function triggerSyncAction(
       data: { status: "FAILED", errors: [message], finishedAt: new Date() },
     });
     return { ok: false, error: message };
+  } finally {
+    // Failed syncs can still have committed partial changes.
+    await invalidateListCache();
   }
 }
 

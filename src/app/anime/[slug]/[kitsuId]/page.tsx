@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import ProviderMediaDetailPage from "@/components/ProviderMediaDetailPage";
+import { getLibrarySnapshot } from "@/lib/library";
 import { getAnimeDetailSnapshot } from "@/lib/media-detail";
-import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Anime Details – Tsuki Anime" };
@@ -15,25 +16,17 @@ export default async function AnimeDetailPage({ params }: Props) {
     getSession(),
     getAnimeDetailSnapshot(kitsuId),
   ]);
-  const anime = detail
-    ? await prisma.anime.findFirst({
-        where: { id: detail.id },
-        select: {
-          id: true,
-          kitsuId: true,
-          anilistId: true,
-          listEntry: true,
-          collectionItems: true,
-        },
-      })
-    : null;
+  if (!detail) notFound();
+  const anime =
+    (await getLibrarySnapshot()).anime.find((item) => item.id === detail.id) ??
+    null;
 
   return (
     <ProviderMediaDetailPage
       kitsuId={detail ? detail.kitsuId : kitsuId}
       fallbackTitle={detail?.titleEn ?? detail?.titleRomaji ?? slug}
       mediaType="anime"
-      mediaId={detail?.id ?? null}
+      mediaId={anime?.id ?? null}
       anilistId={detail?.anilistId ?? null}
       initialDetail={detail}
       hasSession={Boolean(session)}

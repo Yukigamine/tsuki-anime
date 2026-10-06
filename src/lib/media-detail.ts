@@ -1,22 +1,8 @@
 import "server-only";
 import type { Anime, Manga } from "@/generated/prisma/client";
+import { getLibrarySnapshot } from "@/lib/library";
 import type { MediaDetailSnapshot } from "@/lib/media-detail-types";
-import prisma from "@/lib/prisma";
-import {
-  ANIME_TITLE_KEY,
-  getCached,
-  MANGA_TITLE_KEY,
-  setCached,
-  TITLE_TTL,
-} from "@/lib/redis";
-
-function animeTitleKey(identifier: string): string {
-  return `${ANIME_TITLE_KEY}:${identifier}`;
-}
-
-function mangaTitleKey(identifier: string): string {
-  return `${MANGA_TITLE_KEY}:${identifier}`;
-}
+import { getProviderSnapshot } from "@/lib/provider-metadata";
 
 function toAnimeSnapshot(anime: Anime): MediaDetailSnapshot {
   return {
@@ -60,53 +46,30 @@ function toMangaSnapshot(manga: Manga): MediaDetailSnapshot {
   };
 }
 
-async function cacheTitle(
-  key: (identifier: string) => string,
-  snapshot: MediaDetailSnapshot,
-  requestedIdentifier: string,
-): Promise<void> {
-  const identifiers = new Set([
-    requestedIdentifier,
-    snapshot.id,
-    snapshot.kitsuId,
-  ]);
-  await Promise.all(
-    [...identifiers]
-      .filter((identifier): identifier is string => Boolean(identifier))
-      .map((identifier) => setCached(key(identifier), snapshot, TITLE_TTL)),
-  );
-}
-
 export async function getAnimeDetailSnapshot(
   identifier: string,
 ): Promise<MediaDetailSnapshot | null> {
-  const cacheKey = animeTitleKey(identifier);
-  const cached = await getCached<MediaDetailSnapshot>(cacheKey);
-  if (cached) return cached;
-
-  const anime = await prisma.anime.findFirst({
-    where: { OR: [{ id: identifier }, { kitsuId: identifier }] },
-  });
-  if (!anime) return null;
+  if (!/^(?:[1-9]\d{0,9}|c[a-z0-9]{24})$/.test(identifier)) return null;
+  const anime = (await getLibrarySnapshot()).anime.find(
+    (item) => item.id === identifier || item.kitsuId === identifier,
+  );
+  if (!anime) return getProviderSnapshot("anime", identifier);
 
   const snapshot = toAnimeSnapshot(anime);
-  await cacheTitle(animeTitleKey, snapshot, identifier);
+
   return snapshot;
 }
 
 export async function getMangaDetailSnapshot(
   identifier: string,
 ): Promise<MediaDetailSnapshot | null> {
-  const cacheKey = mangaTitleKey(identifier);
-  const cached = await getCached<MediaDetailSnapshot>(cacheKey);
-  if (cached) return cached;
-
-  const manga = await prisma.manga.findFirst({
-    where: { OR: [{ id: identifier }, { kitsuId: identifier }] },
-  });
-  if (!manga) return null;
+  if (!/^(?:[1-9]\d{0,9}|c[a-z0-9]{24})$/.test(identifier)) return null;
+  const manga = (await getLibrarySnapshot()).manga.find(
+    (item) => item.id === identifier || item.kitsuId === identifier,
+  );
+  if (!manga) return getProviderSnapshot("manga", identifier);
 
   const snapshot = toMangaSnapshot(manga);
-  await cacheTitle(mangaTitleKey, snapshot, identifier);
+
   return snapshot;
 }
