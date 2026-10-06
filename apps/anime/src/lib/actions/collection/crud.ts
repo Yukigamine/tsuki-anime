@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { invalidateListCache } from "@/lib/redis";
 import { requireSession } from "@/lib/session";
 import type {
   ActionResult,
@@ -28,6 +29,7 @@ export async function addAnimeCollectionItem(
         barcode: input.barcode || null,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: { id: item.id } };
   } catch (err) {
     console.error("[collection] addAnimeCollectionItem error:", err);
@@ -59,6 +61,7 @@ export async function editAnimeCollectionItem(
         barcode: input.barcode || null,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: undefined };
   } catch (err) {
     console.error("[collection] editAnimeCollectionItem error:", err);
@@ -78,6 +81,7 @@ export async function deleteAnimeCollectionItem(
     if (!existing) return { ok: false, error: "Item not found" };
 
     await prisma.animeCollectionItem.delete({ where: { id } });
+    await invalidateListCache();
     return { ok: true, data: undefined };
   } catch (err) {
     console.error("[collection] deleteAnimeCollectionItem error:", err);
@@ -102,6 +106,7 @@ export async function addMangaCollectionItem(
         chapters: input.chapters,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: { id: item.id } };
   } catch (err) {
     console.error("[collection] addMangaCollectionItem error:", err);
@@ -155,6 +160,7 @@ export async function editMangaCollectionItem(
         chapters: prunedChapters,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: undefined };
   } catch (err) {
     console.error("[collection] editMangaCollectionItem error:", err);
@@ -174,6 +180,7 @@ export async function deleteMangaCollectionItem(
     if (!existing) return { ok: false, error: "Item not found" };
 
     await prisma.mangaCollectionItem.delete({ where: { id } });
+    await invalidateListCache();
     return { ok: true, data: undefined };
   } catch (err) {
     console.error("[collection] deleteMangaCollectionItem error:", err);
@@ -237,6 +244,7 @@ export async function resolveAnimeId(
           bannerImageUrl: data.bannerImageUrl ?? undefined,
         },
       });
+      await invalidateListCache();
       return { ok: true, data: existing.id };
     }
 
@@ -255,6 +263,7 @@ export async function resolveAnimeId(
         bannerImageUrl: data.bannerImageUrl ?? null,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: created.id };
   } catch (err) {
     console.error("[collection] resolveAnimeId error:", err);
@@ -292,6 +301,7 @@ export async function resolveMangaId(
           coverImageUrl: data.coverImageUrl ?? undefined,
         },
       });
+      await invalidateListCache();
       return { ok: true, data: existing.id };
     }
 
@@ -310,6 +320,7 @@ export async function resolveMangaId(
         coverImageUrl: data.coverImageUrl ?? null,
       },
     });
+    await invalidateListCache();
     return { ok: true, data: created.id };
   } catch (err) {
     console.error("[collection] resolveMangaId error:", err);

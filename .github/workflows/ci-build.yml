@@ -45,5 +45,6 @@ jobs:
       - name: Build package (to confirm building works)
         run: pnpm build
         env:
+          BETTER_AUTH_SECRET: "ci-build-only-secret-not-for-production-000000000000"
           POSTGRES_URL: ""
           POSTGRES_URL_NON_POOLING: ""

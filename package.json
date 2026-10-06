@@ -13,15 +13,15 @@
   "homepage": "https://github.com/Yukigamine/tsuki-media#readme",
   "scripts": {
     "dev": "pnpm --filter @tsuki-media/anime dev",
-    "dev:all": "pnpm --parallel --filter './apps/*' dev",
+    "dev:all": "pnpm --parallel --filter @tsuki-media/anime --filter @tsuki-media/books --filter @tsuki-media/movies dev",
     "dev:anime": "pnpm --filter @tsuki-media/anime dev",
     "dev:books": "pnpm --filter @tsuki-media/books dev",
     "dev:movies": "pnpm --filter @tsuki-media/movies dev",
-    "build": "pnpm generate && pnpm --filter './apps/*' build",
+    "build": "pnpm generate && pnpm --filter @tsuki-media/anime --filter @tsuki-media/books --filter @tsuki-media/movies build",
     "build:anime": "pnpm --filter @tsuki-media/anime build",
     "build:books": "pnpm --filter @tsuki-media/books build",
     "build:movies": "pnpm --filter @tsuki-media/movies build",
-    "generate": "pnpm --filter './apps/*' generate",
+    "generate": "pnpm --filter @tsuki-media/anime --filter @tsuki-media/books --filter @tsuki-media/movies generate",
     "start": "pnpm --filter @tsuki-media/anime start",
     "lint": "biome lint --write",
     "lint-check": "biome check && pnpm --filter @tsuki-media/anime knip",
@@ -43,15 +43,15 @@
     "zeus:anilist": "pnpm --filter @tsuki-media/anime zeus:anilist"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.15",
-    "@commitlint/cli": "21.0.1",
-    "@commitlint/config-conventional": "21.0.1",
-    "@commitlint/types": "21.0.1",
+    "@biomejs/biome": "2.5.15",
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "@commitlint/types": "21.2.3",
     "husky": "9.1.7",
-    "knip": "6.14.2",
-    "lint-staged": "17.0.5",
-    "tsx": "4.22.3",
-    "typescript": "6.0.3"
+    "knip": "6.39.0",
+    "lint-staged": "17.6.0",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
   },
   "packageManager": "pnpm@11.20.0"
 }
